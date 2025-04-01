@@ -9,13 +9,17 @@ interface EpisodeListProps {
   isLoading: boolean;
   hasMore: boolean;
   onLoadMore: () => void;
+  currentPage?: number;
+  totalPages?: number;
 }
 
 const EpisodeList: React.FC<EpisodeListProps> = ({ 
   episodes, 
   isLoading, 
   hasMore,
-  onLoadMore 
+  onLoadMore,
+  currentPage,
+  totalPages
 }) => {
   if (isLoading && episodes.length === 0) {
     return (
@@ -54,6 +58,8 @@ const EpisodeList: React.FC<EpisodeListProps> = ({
         onClick={onLoadMore} 
         isLoading={isLoading} 
         hasMore={hasMore}
+        currentPage={currentPage}
+        totalPages={totalPages}
       />
     </>
   );

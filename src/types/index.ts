@@ -21,5 +21,6 @@ export interface ScrapingState {
   currentPage: number;
   totalEpisodes: number;
   hasMore: boolean;
+  estimatedTotalPages?: number;
   error?: string;
 }
