@@ -15,3 +15,11 @@ export interface DownloadProgress {
   isComplete: boolean;
   error?: string;
 }
+
+export interface ScrapingState {
+  isActive: boolean;
+  currentPage: number;
+  totalEpisodes: number;
+  hasMore: boolean;
+  error?: string;
+}
