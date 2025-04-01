@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 
 // Estimation du nombre total d'épisodes et de pages
 // Basé sur le fait que ce podcast existe depuis 2010 et sort environ 40 épisodes par an
-const ESTIMATED_TOTAL_EPISODES = 500;
+const ESTIMATED_TOTAL_EPISODES = 600;
 const EPISODES_PER_PAGE = 5;
 const ESTIMATED_TOTAL_PAGES = Math.ceil(ESTIMATED_TOTAL_EPISODES / EPISODES_PER_PAGE);
 
