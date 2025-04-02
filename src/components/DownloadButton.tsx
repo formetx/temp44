@@ -5,7 +5,7 @@ import { downloadEpisode } from '@/services/scraper';
 import { Button } from '@/components/ui/button';
 import { Download, Check, AlertCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface DownloadButtonProps {
   episode: Episode;
@@ -45,7 +45,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
         }));
         toast({
           title: "Téléchargement terminé",
-          description: `"${episode.title}" a été téléchargé avec succès dans le dossier ./FIDarwin`,
+          description: `"${episode.title}" a été téléchargé avec succès`,
           duration: 5000,
         });
         onDownloadComplete();

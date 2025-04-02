@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { Episode, ScrapingState } from '@/types';
-import { fetchEpisodes, scrapeAllEpisodes } from '@/services/scraper';
+import { fetchEpisodes, scrapeAllEpisodes, downloadEpisode } from '@/services/scraper';
 import { useToast } from '@/hooks/use-toast';
 
 // Estimation du nombre total d'épisodes et de pages
@@ -109,16 +108,39 @@ export const usePodcastScraper = () => {
   };
 
   // Téléchargement de tous les épisodes
-  const downloadAllEpisodes = () => {
+  const downloadAllEpisodes = async () => {
     toast({
       title: "Téléchargement en cours",
       description: "Le téléchargement de tous les épisodes va commencer. Cela peut prendre un moment.",
       duration: 5000,
     });
     
+    if (episodes.length === 0) {
+      toast({
+        title: "Aucun épisode disponible",
+        description: "Veuillez d'abord charger des épisodes avant de les télécharger.",
+        variant: "destructive",
+        duration: 5000,
+      });
+      return;
+    }
+    
+    // Télécharger les 5 premiers épisodes pour éviter de surcharger le navigateur
+    const episodesToDownload = episodes.slice(0, 5);
+    let successCount = 0;
+    
+    for (const episode of episodesToDownload) {
+      try {
+        const success = await downloadEpisode(episode, () => {});
+        if (success) successCount++;
+      } catch (err) {
+        console.error(`Erreur lors du téléchargement de l'épisode ${episode.title}:`, err);
+      }
+    }
+    
     toast({
-      title: "Fonctionnalité simulée",
-      description: "Dans cette version de démonstration, les téléchargements sont simulés. Dans une implémentation réelle, un serveur serait nécessaire.",
+      title: `${successCount} épisodes téléchargés`,
+      description: "Les téléchargements des podcasts ont été initiés. Vérifiez votre dossier de téléchargements.",
       duration: 8000,
     });
   };

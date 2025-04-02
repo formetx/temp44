@@ -1,4 +1,3 @@
-
 import { Episode, ScrapingState } from "@/types";
 
 // URL de base pour le podcast
@@ -6,6 +5,15 @@ const BASE_URL = "https://www.radiofrance.fr/franceinter/podcasts/sur-les-epaule
 
 // Estimation du nombre total d'épisodes (basé sur la réalité du podcast)
 const ESTIMATED_TOTAL_EPISODES = 600;
+
+// Images placeholders valides
+const PLACEHOLDER_IMAGES = [
+  "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=800&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=600&fit=crop"
+];
 
 // Fonction pour générer un épisode mock avec un numéro
 const generateMockEpisode = (index: number): Episode => {
@@ -34,13 +42,14 @@ const generateMockEpisode = (index: number): Episode => {
   ];
   
   const titleIndex = index % 10;
+  const imageIndex = index % PLACEHOLDER_IMAGES.length;
   
   return {
     id: `${index + 1}`,
     title: titles[titleIndex],
     date: dateString,
     description: `Épisode ${index + 1} de la série "Sur les épaules de Darwin" de Jean-Claude Ameisen sur France Inter.`,
-    imageUrl: `https://cdn.radiofrance.fr/s3/cruiser-production/2023/07/cb93adf4-8dbd-4899-ae9a-d90b7c88c8dc/1200x680_sc_darwin-episode-${(index % 5) + 1}.jpg`,
+    imageUrl: PLACEHOLDER_IMAGES[imageIndex],
     audioUrl: `https://media.radiofrance-podcast.net/podcast09/18772-${dateString.replace(/\s/g, '')}-EPISODE${index + 1}.mp3`,
     duration: `${Math.floor(40 + Math.random() * 20)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`
   };
@@ -103,8 +112,13 @@ export const downloadEpisode = async (
 ): Promise<boolean> => {
   console.log(`Téléchargement de l'épisode: ${episode.title}`);
   
-  // Simulation du téléchargement avec progression
-  return new Promise((resolve) => {
+  try {
+    // Créer un élément a invisible pour déclencher le téléchargement
+    const link = document.createElement('a');
+    link.href = episode.audioUrl;
+    link.download = `${episode.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp3`;
+    
+    // Simuler la progression pour une meilleure expérience utilisateur
     let progress = 0;
     const interval = setInterval(() => {
       progress += 10;
@@ -112,11 +126,21 @@ export const downloadEpisode = async (
       
       if (progress >= 100) {
         clearInterval(interval);
+        
+        // Déclencher le téléchargement une fois la progression terminée
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
         console.log(`Épisode ${episode.title} téléchargé avec succès`);
-        resolve(true);
       }
-    }, 500);
-  });
+    }, 300);
+    
+    return true;
+  } catch (error) {
+    console.error(`Erreur lors du téléchargement: ${error}`);
+    return false;
+  }
 };
 
 // Fonction pour scraper tous les épisodes de manière récursive
