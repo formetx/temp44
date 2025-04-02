@@ -1,6 +1,11 @@
+
 import { useState, useEffect } from 'react';
 import { Episode, ScrapingState } from '@/types';
-import { fetchEpisodes, scrapeAllEpisodes, downloadEpisode } from '@/services/scraper';
+import { 
+  fetchEpisodes, 
+  scrapeAllEpisodes 
+} from '@/services/episode';
+import { downloadEpisode } from '@/services/episode/downloader';
 import { useToast } from '@/hooks/use-toast';
 
 // Estimation du nombre total d'épisodes et de pages

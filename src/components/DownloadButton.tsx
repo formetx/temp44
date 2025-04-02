@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Episode, DownloadProgress } from '@/types';
-import { downloadEpisode } from '@/services/scraper';
+import { downloadEpisode } from '@/services/episode/downloader';
 import { Button } from '@/components/ui/button';
 import { Download, Check, AlertCircle, HardDrive } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
