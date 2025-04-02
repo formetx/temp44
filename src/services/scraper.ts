@@ -113,11 +113,6 @@ export const downloadEpisode = async (
   console.log(`Téléchargement de l'épisode: ${episode.title}`);
   
   try {
-    // Créer un élément a invisible pour déclencher le téléchargement
-    const link = document.createElement('a');
-    link.href = episode.audioUrl;
-    link.download = `${episode.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp3`;
-    
     // Simuler la progression pour une meilleure expérience utilisateur
     let progress = 0;
     const interval = setInterval(() => {
@@ -127,7 +122,10 @@ export const downloadEpisode = async (
       if (progress >= 100) {
         clearInterval(interval);
         
-        // Déclencher le téléchargement une fois la progression terminée
+        // Créer un élément a invisible pour déclencher le téléchargement
+        const link = document.createElement('a');
+        link.href = episode.audioUrl;
+        link.download = `${episode.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp3`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

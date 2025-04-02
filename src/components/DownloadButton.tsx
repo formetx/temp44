@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Episode, DownloadProgress } from '@/types';
 import { downloadEpisode } from '@/services/scraper';
 import { Button } from '@/components/ui/button';
-import { Download, Check, AlertCircle } from 'lucide-react';
+import { Download, Check, AlertCircle, HardDrive } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 
@@ -45,7 +45,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
         }));
         toast({
           title: "Téléchargement terminé",
-          description: `"${episode.title}" a été téléchargé avec succès`,
+          description: `"${episode.title}" a été téléchargé dans votre dossier de téléchargements`,
           duration: 5000,
         });
         onDownloadComplete();
