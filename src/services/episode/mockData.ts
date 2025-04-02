@@ -7,14 +7,17 @@ export const BASE_URL = "https://www.radiofrance.fr/franceinter/podcasts/sur-les
 // Estimation du nombre total d'épisodes (basé sur la réalité du podcast)
 export const ESTIMATED_TOTAL_EPISODES = 600;
 
-// Images placeholders valides
+// Images placeholders valides et optimisées
 export const PLACEHOLDER_IMAGES = [
-  "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=600&fit=crop"
+  "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=600&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=600&fit=crop&q=80"
 ];
+
+// Image de fallback en cas d'erreur
+export const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=600&fit=crop&q=80";
 
 // Fonction pour générer un épisode mock avec un numéro
 export const generateMockEpisode = (index: number): Episode => {
