@@ -25,12 +25,14 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
 
   const handleDownload = async () => {
     try {
+      // Réinitialiser l'état de téléchargement
       setDownloadState({
         episodeId: episode.id,
         progress: 0,
         isComplete: false
       });
 
+      // Lancer le téléchargement réel
       const success = await downloadEpisode(episode, (progress) => {
         setDownloadState(prev => ({
           ...prev,
@@ -45,7 +47,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
         }));
         toast({
           title: "Téléchargement terminé",
-          description: `"${episode.title}" a été téléchargé dans votre dossier de téléchargements`,
+          description: `"${episode.title}" a été téléchargé dans votre dossier de téléchargements. Vérifiez votre dossier de téléchargements par défaut du navigateur.`,
           duration: 5000,
         });
         onDownloadComplete();
