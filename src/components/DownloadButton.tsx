@@ -45,8 +45,8 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
           isComplete: true
         }));
         toast({
-          title: "Téléchargement terminé",
-          description: `"${episode.title}" a été téléchargé. Vérifiez votre dossier de téléchargements.`,
+          title: "Téléchargement initié",
+          description: `"${episode.title}" est en cours de téléchargement. Vérifiez votre dossier de téléchargements.`,
           duration: 5000,
         });
         onDownloadComplete();

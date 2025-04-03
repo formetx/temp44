@@ -20,25 +20,9 @@ export const downloadEpisode = async (
       return false;
     }
 
-    // Requête pour obtenir l'audio
-    const response = await fetch(episode.audioUrl);
-    
-    // Mise à jour de la progression
-    onProgress(50);
-
-    if (!response.ok) {
-      console.error(`Erreur lors du téléchargement: ${response.statusText}`);
-      return false;
-    }
-
-    // Récupération du blob audio
-    const blob = await response.blob();
-    onProgress(80);
-
-    // Création d'un lien de téléchargement pour le fichier
-    const url = window.URL.createObjectURL(blob);
+    // Création d'un élément a invisible pour déclencher le téléchargement
     const link = document.createElement('a');
-    link.href = url;
+    link.href = episode.audioUrl;
     
     // Nom du fichier basé sur le titre de l'épisode
     const fileName = `${episode.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp3`;
@@ -49,12 +33,9 @@ export const downloadEpisode = async (
     link.click();
     document.body.removeChild(link);
     
-    // Libération de la ressource
-    window.URL.revokeObjectURL(url);
-    
-    // Téléchargement terminé avec succès
+    // Téléchargement initié, on considère qu'il est en cours
     onProgress(100);
-    console.log(`Épisode ${episode.title} téléchargé avec succès`);
+    console.log(`Épisode ${episode.title} téléchargement initié`);
     
     return true;
   } catch (error) {
