@@ -5,6 +5,8 @@ import EpisodeList from '@/components/EpisodeList';
 import ScrapingStatus from '@/components/ScrapingStatus';
 import InfoCard from '@/components/InfoCard';
 import { usePodcastScraper } from '@/hooks/usePodcastScraper';
+import { Button } from '@/components/ui/button';
+import { ExternalLink } from 'lucide-react';
 
 const Index = () => {
   const {
@@ -25,6 +27,26 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <Header />
+        
+        <div className="mt-4 mb-6 bg-gray-100 p-4 rounded-lg text-sm">
+          <div className="flex items-start">
+            <div className="flex-1">
+              <h3 className="font-medium mb-1">Source du podcast : Sur les épaules de Darwin</h3>
+              <p className="text-muted-foreground">
+                Cette application vous permet de télécharger les épisodes du podcast "Sur les épaules de Darwin" de France Inter.
+              </p>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="ml-4"
+              onClick={() => window.open('https://www.radiofrance.fr/franceinter/podcasts/sur-les-epaules-de-darwin', '_blank')}
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Voir sur France Inter
+            </Button>
+          </div>
+        </div>
         
         <div className="mt-8">
           <InfoCard 

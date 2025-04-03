@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Episode, DownloadProgress } from '@/types';
 import { downloadEpisode } from '@/services/episode/downloader';
+import { getProbableAudioUrl } from '@/services/episode/audioExtractor';
 import { Button } from '@/components/ui/button';
 import { Download, Check, AlertCircle, ExternalLink } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
@@ -25,13 +26,21 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadedFilename, setDownloadedFilename] = useState<string | null>(null);
 
+  // Créer un nom de fichier propre pour l'épisode
+  const getFileName = () => {
+    return `${episode.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp3`;
+  };
+
   const handleDirectDownload = () => {
-    // Crée un nom de fichier basé sur le titre
-    const fileName = `${episode.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp3`;
+    const fileName = getFileName();
+    const audioUrl = getProbableAudioUrl(episode);
+    
+    // Log l'URL utilisée pour aider au débogage
+    console.log(`Téléchargement direct depuis: ${audioUrl}`);
     
     // Crée un lien d'accès direct au fichier audio
     const link = document.createElement('a');
-    link.href = episode.audioUrl;
+    link.href = audioUrl;
     link.download = fileName;
     link.target = '_blank';
     document.body.appendChild(link);
@@ -43,6 +52,15 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
       description: "Le téléchargement a été lancé directement depuis la source. Vérifiez votre navigateur.",
       duration: 5000,
     });
+
+    // Marquer comme téléchargé
+    setDownloadState({
+      episodeId: episode.id,
+      progress: 100,
+      isComplete: true
+    });
+    setDownloadedFilename(fileName);
+    onDownloadComplete();
   };
 
   const handleDownload = async () => {
@@ -60,7 +78,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
       });
 
       // Créer un nom de fichier propre pour l'épisode
-      const fileName = `${episode.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp3`;
+      const fileName = getFileName();
       setDownloadedFilename(fileName);
 
       // Lancer le téléchargement réel avec mise à jour de la progression
