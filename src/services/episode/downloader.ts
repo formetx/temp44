@@ -32,6 +32,9 @@ export const downloadEpisode = async (
     // Début du suivi de progression
     onProgress(10);
 
+    // Nom du fichier basé sur le titre de l'épisode
+    const fileName = `${episode.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp3`;
+
     // En mode développement, simulons le téléchargement sans appeler Supabase
     // Cela permet de tester l'application sans avoir besoin des variables d'environnement
     if (!supabaseUrl || !supabaseKey) {
@@ -55,7 +58,7 @@ export const downloadEpisode = async (
       // Simuler le temps de téléchargement
       await new Promise(resolve => setTimeout(resolve, 5000));
       
-      console.log(`Épisode ${episode.title} téléchargé avec succès (simulation)`);
+      console.log(`Épisode ${episode.title} téléchargé avec succès (simulation) sous le nom ${fileName}`);
       return true;
     }
 
@@ -90,8 +93,7 @@ export const downloadEpisode = async (
     const link = document.createElement('a');
     link.href = url;
     
-    // Nom du fichier basé sur le titre de l'épisode
-    const fileName = `${episode.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp3`;
+    // On définit le nom du fichier
     link.download = fileName;
     
     // Déclenchement du téléchargement
@@ -104,7 +106,7 @@ export const downloadEpisode = async (
     
     // Téléchargement terminé avec succès
     onProgress(100);
-    console.log(`Épisode ${episode.title} téléchargé avec succès`);
+    console.log(`Épisode ${episode.title} téléchargé avec succès sous le nom ${fileName}`);
     
     return true;
   } catch (error) {

@@ -23,6 +23,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
   });
   const { toast } = useToast();
   const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadedFilename, setDownloadedFilename] = useState<string | null>(null);
 
   const handleDownload = async () => {
     if (isDownloading) return;
@@ -38,6 +39,10 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
         isComplete: false
       });
 
+      // Créer un nom de fichier propre pour l'épisode
+      const fileName = `${episode.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp3`;
+      setDownloadedFilename(fileName);
+
       // Lancer le téléchargement réel avec mise à jour de la progression
       const success = await downloadEpisode(episode, (progress) => {
         console.log(`Progression du téléchargement: ${progress}%`);
@@ -52,10 +57,22 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
           ...prev,
           isComplete: true
         }));
+        
+        // Message toast amélioré avec plus d'informations
         toast({
           title: "Téléchargement terminé",
-          description: `"${episode.title}" a été téléchargé dans votre dossier de téléchargements. Vérifiez votre dossier de téléchargements par défaut du navigateur.`,
-          duration: 5000,
+          description: (
+            <div>
+              <p><strong>"{episode.title}"</strong> a été téléchargé sous le nom <strong>{fileName}</strong>.</p>
+              <p className="mt-2 text-xs">Le fichier se trouve dans votre dossier de téléchargements par défaut du navigateur :</p>
+              <ul className="mt-1 text-xs list-disc list-inside">
+                <li>Chrome/Edge: Généralement dans "Téléchargements" ou "Downloads"</li>
+                <li>Firefox: Vérifiez dans le gestionnaire de téléchargements (Ctrl+J)</li>
+                <li>Safari: Cliquez sur l'icône de téléchargement dans la barre d'outils</li>
+              </ul>
+            </div>
+          ),
+          duration: 10000,
         });
         onDownloadComplete();
       }
@@ -77,10 +94,37 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
 
   if (downloadState.isComplete) {
     return (
-      <Button variant="outline" className="bg-green-50 text-green-600 border-green-200" disabled>
-        <Check className="h-4 w-4 mr-2" />
-        Téléchargé
-      </Button>
+      <div className="space-y-2 w-full">
+        <Button variant="outline" className="bg-green-50 text-green-600 border-green-200 w-full" disabled>
+          <Check className="h-4 w-4 mr-2" />
+          Téléchargé {downloadedFilename && `(${downloadedFilename})`}
+        </Button>
+        <p className="text-xs text-muted-foreground">
+          Le fichier est dans votre dossier de téléchargements du navigateur.
+          <button 
+            onClick={() => {
+              toast({
+                title: "Emplacement du fichier",
+                description: (
+                  <div>
+                    <p>Votre fichier a été téléchargé sous le nom <strong>{downloadedFilename}</strong>.</p>
+                    <p className="mt-2">Pour trouver ce fichier :</p>
+                    <ul className="mt-1 list-disc list-inside">
+                      <li>Chrome/Edge : Dossier "Téléchargements" ou "Downloads"</li>
+                      <li>Firefox : Ouvrez le gestionnaire de téléchargements (Ctrl+J)</li>
+                      <li>Safari : Cliquez sur l'icône de téléchargement</li>
+                    </ul>
+                  </div>
+                ),
+                duration: 8000,
+              });
+            }}
+            className="ml-1 text-xs underline hover:text-blue-600"
+          >
+            Où se trouve mon fichier ?
+          </button>
+        </p>
+      </div>
     );
   }
 
