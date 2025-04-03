@@ -1,7 +1,7 @@
 
 import { Episode } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
-import { getProbableAudioUrl } from "./audioExtractor";
+import { getProbableAudioUrl, getAlternativeUrls } from "./audioExtractor";
 
 // Fonction pour télécharger un épisode via Supabase Edge Function
 export const downloadEpisode = async (
@@ -18,29 +18,45 @@ export const downloadEpisode = async (
     const fileName = `${episode.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp3`;
 
     // S'assurer que nous avons une URL audio valide
-    const audioUrl = getProbableAudioUrl(episode);
-    console.log(`URL audio déterminée: ${audioUrl}`);
+    const mainAudioUrl = getProbableAudioUrl(episode);
+    console.log(`URL audio principale: ${mainAudioUrl}`);
     
-    if (!audioUrl) {
-      console.error(`Impossible de déterminer l'URL audio pour: ${episode.title}`);
-      onProgress(100);
-      return false;
-    }
-
-    // Essayer d'abord un téléchargement direct (plus simple et plus fiable)
+    // Récupérer des URL alternatives au cas où la principale échoue
+    const alternativeUrls = getAlternativeUrls(episode);
+    
+    // Essayer d'abord un téléchargement direct avec l'URL principale
     onProgress(30);
     
     try {
-      console.log(`Tentative de téléchargement direct depuis: ${audioUrl}`);
-      const result = await downloadDirectly(audioUrl, fileName);
+      console.log(`Tentative de téléchargement direct depuis: ${mainAudioUrl}`);
+      const result = await downloadDirectly(mainAudioUrl, fileName);
       if (result) {
         onProgress(100);
         console.log(`Téléchargement direct réussi pour: ${episode.title}`);
         return true;
       }
     } catch (directError) {
-      console.error(`Échec du téléchargement direct: ${directError}`);
-      // Continue vers la méthode Supabase Edge Function
+      console.error(`Échec du téléchargement direct avec l'URL principale: ${directError}`);
+      
+      // Essayer les URL alternatives
+      for (const url of alternativeUrls) {
+        if (url === mainAudioUrl) continue; // Skip the main URL as we already tried it
+        
+        try {
+          console.log(`Tentative avec URL alternative: ${url}`);
+          const result = await downloadDirectly(url, fileName);
+          if (result) {
+            onProgress(100);
+            console.log(`Téléchargement réussi avec URL alternative pour: ${episode.title}`);
+            return true;
+          }
+        } catch (altError) {
+          console.error(`Échec avec URL alternative: ${url}`, altError);
+        }
+      }
+      
+      // Si on arrive ici, aucune URL n'a fonctionné
+      console.error("Toutes les URL ont échoué, passage à la méthode Supabase Edge Function");
     }
 
     // Récupérer les données du client Supabase
@@ -49,11 +65,11 @@ export const downloadEpisode = async (
     
     if (!supabaseUrl || !supabaseKey) {
       console.error("Configuration Supabase manquante");
-      return await fallbackToDirectDownload({ ...episode, audioUrl }, fileName, onProgress);
+      return await fallbackToDirectDownload({ ...episode, audioUrl: mainAudioUrl }, fileName, onProgress, alternativeUrls);
     }
 
     // Construction de l'URL de la fonction edge Supabase avec l'URL audio en paramètre
-    const edgeFunctionUrl = `${supabaseUrl}/functions/v1/download-episode?url=${encodeURIComponent(audioUrl)}`;
+    const edgeFunctionUrl = `${supabaseUrl}/functions/v1/download-episode?url=${encodeURIComponent(mainAudioUrl)}`;
     console.log(`Appel de la fonction edge: ${edgeFunctionUrl}`);
     
     // Préparation de la requête avec le token d'authentification
@@ -80,8 +96,8 @@ export const downloadEpisode = async (
         console.error("Impossible de lire les détails de l'erreur");
       }
       
-      // En cas d'échec, tenter un téléchargement direct
-      return await fallbackToDirectDownload({ ...episode, audioUrl }, fileName, onProgress);
+      // En cas d'échec, tenter un téléchargement direct avec les URLs alternatives
+      return await fallbackToDirectDownload({ ...episode, audioUrl: mainAudioUrl }, fileName, onProgress, alternativeUrls);
     }
 
     // Récupération du blob audio
@@ -91,7 +107,7 @@ export const downloadEpisode = async (
     // Vérification du contenu reçu
     if (blob.size === 0) {
       console.error("Fichier vide reçu");
-      return await fallbackToDirectDownload({ ...episode, audioUrl }, fileName, onProgress);
+      return await fallbackToDirectDownload({ ...episode, audioUrl: mainAudioUrl }, fileName, onProgress, alternativeUrls);
     }
 
     // Création d'un lien de téléchargement pour le fichier
@@ -118,11 +134,12 @@ export const downloadEpisode = async (
   } catch (error) {
     console.error(`Erreur lors du téléchargement: ${error}`);
     
-    // En cas d'erreur, tenter un téléchargement direct
+    // En cas d'erreur, tenter un téléchargement direct avec toutes les URLs
     try {
       const fileName = `${episode.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp3`;
-      const audioUrl = getProbableAudioUrl(episode);
-      return await fallbackToDirectDownload({ ...episode, audioUrl }, fileName, onProgress);
+      const mainAudioUrl = getProbableAudioUrl(episode);
+      const alternativeUrls = getAlternativeUrls(episode);
+      return await fallbackToDirectDownload({ ...episode, audioUrl: mainAudioUrl }, fileName, onProgress, alternativeUrls);
     } catch (directError) {
       console.error("Échec également du téléchargement direct:", directError);
       return false;
@@ -150,22 +167,46 @@ async function downloadDirectly(url: string, fileName: string): Promise<boolean>
 async function fallbackToDirectDownload(
   episode: Episode, 
   fileName: string,
-  onProgress: (progress: number) => void
+  onProgress: (progress: number) => void,
+  alternativeUrls: string[] = []
 ): Promise<boolean> {
   try {
-    console.log(`Téléchargement direct depuis ${episode.audioUrl}`);
+    console.log(`Tentative de téléchargement direct depuis ${episode.audioUrl}`);
     
     // Simuler une progression
     onProgress(85);
     
-    // Utiliser la fonction de téléchargement direct
-    const result = await downloadDirectly(episode.audioUrl, fileName);
+    // D'abord essayer l'URL principale
+    try {
+      const result = await downloadDirectly(episode.audioUrl, fileName);
+      if (result) {
+        onProgress(100);
+        console.log(`Téléchargement direct réussi pour ${episode.title}`);
+        return true;
+      }
+    } catch (error) {
+      console.error(`Échec du téléchargement direct avec l'URL principale: ${error}`);
+    }
     
-    // Téléchargement terminé
-    onProgress(100);
-    console.log(`Téléchargement direct ${result ? "réussi" : "échoué"} pour ${episode.title}`);
+    // Si l'URL principale échoue, essayer les URL alternatives
+    for (const altUrl of alternativeUrls) {
+      try {
+        console.log(`Tentative avec URL alternative: ${altUrl}`);
+        const result = await downloadDirectly(altUrl, fileName);
+        if (result) {
+          onProgress(100);
+          console.log(`Téléchargement réussi avec URL alternative pour ${episode.title}`);
+          return true;
+        }
+      } catch (altError) {
+        console.error(`Échec avec URL alternative: ${altError}`);
+      }
+    }
     
-    return result;
+    // Si toutes les tentatives ont échoué
+    console.error("Toutes les URLs ont échoué");
+    onProgress(100); // Marquer comme terminé même en cas d'échec
+    return false;
   } catch (error) {
     console.error(`Échec du téléchargement direct: ${error}`);
     onProgress(100); // Marquer comme terminé même en cas d'échec

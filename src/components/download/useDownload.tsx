@@ -1,7 +1,8 @@
+
 import { useState } from 'react';
 import { Episode, DownloadProgress } from '@/types';
 import { downloadEpisode } from '@/services/episode/downloader';
-import { getProbableAudioUrl } from '@/services/episode/audioExtractor';
+import { getProbableAudioUrl, getAlternativeUrls } from '@/services/episode/audioExtractor';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
@@ -36,6 +37,10 @@ export const useDownload = (episode: Episode, onDownloadComplete: () => void) =>
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    // Log alternative URLs for debugging
+    const altUrls = getAlternativeUrls(episode);
+    console.log("URLs alternatives disponibles:", altUrls);
     
     toast({
       title: "Téléchargement lancé",
@@ -91,7 +96,7 @@ export const useDownload = (episode: Episode, onDownloadComplete: () => void) =>
           title: "Téléchargement terminé",
           description: (
             <div>
-              <p><strong>"{episode.title}"</strong> a été téléchargé sous le nom <strong>{fileName}</strong>.</p>
+              <p><strong>{`"${episode.title}"`}</strong> a été téléchargé sous le nom <strong>{fileName}</strong>.</p>
               <p className="mt-2 text-xs">Le fichier se trouve dans votre dossier de téléchargements par défaut du navigateur :</p>
               <ul className="mt-1 text-xs list-disc list-inside">
                 <li>Chrome/Edge: Généralement dans "Téléchargements" ou "Downloads"</li>
