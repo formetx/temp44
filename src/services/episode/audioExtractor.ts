@@ -3,7 +3,7 @@
  * Utilitaire pour extraire et normaliser les URL audio des épisodes
  */
 
-// La formule correcte pour les podcasts France Inter
+// La formule correcte pour les podcasts France Inter selon leur site web
 export const buildProbableAudioUrl = (episodeId: string, date: string): string => {
   // Convertir la date au format requis
   const dateObj = new Date(date);
@@ -11,9 +11,9 @@ export const buildProbableAudioUrl = (episodeId: string, date: string): string =
   const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
   const year = dateObj.getFullYear();
   
-  // Format correct pour les URL de France Inter
-  // Les podcasts de Sur les épaules de Darwin utilisent généralement ce format
-  return `https://media.radiofrance-podcast.net/podcast09/18772-${day}.${month}.${year}-SUR-LES-EPAULES-DE-DARWIN-${episodeId}.mp3`;
+  // Format actualisé pour les URL de France Inter
+  // Format: YYYYMMDD_EMISSION-ID (le format utilisé sur le site web)
+  return `https://media.radiofrance-podcast.net/podcast09/18772-${year}${month}${day}_FRANCEINTER-${episodeId}.mp3`;
 };
 
 // Fonction pour tenter d'extraire l'ID depuis le titre
@@ -47,18 +47,28 @@ export const getAlternativeUrls = (episode: {
   
   const episodeId = extractEpisodeIdFromTitle(episode.title) || episode.id;
   
+  // Formats utilisés par Radio France au fil du temps
   return [
-    // Format 1: day.month.year-SUR-LES-EPAULES-DE-DARWIN-episode.mp3
+    // Nouveau format 1: YYYYMMDD_FRANCEINTER-episode.mp3
+    `https://media.radiofrance-podcast.net/podcast09/18772-${year}${month}${day}_FRANCEINTER-${episodeId}.mp3`,
+    
+    // Nouveau format 2: YYYYMMDD_FRANCEINTER-0.mp3 (sans spécifier l'épisode)
+    `https://media.radiofrance-podcast.net/podcast09/18772-${year}${month}${day}_FRANCEINTER-0.mp3`,
+    
+    // Nouveau format 3: YYYYMMDD_SUR-LES-EPAULES-DE-DARWIN.mp3
+    `https://media.radiofrance-podcast.net/podcast09/18772-${year}${month}${day}_SUR-LES-EPAULES-DE-DARWIN.mp3`,
+    
+    // Ancien format 1: day.month.year-SUR-LES-EPAULES-DE-DARWIN-episode.mp3
     `https://media.radiofrance-podcast.net/podcast09/18772-${day}.${month}.${year}-SUR-LES-EPAULES-DE-DARWIN-${episodeId}.mp3`,
     
-    // Format 2: day.month.year-SUR-LES-EPAULES-DE-DARWIN.mp3 (sans numéro d'épisode)
+    // Ancien format 2: day.month.year-SUR-LES-EPAULES-DE-DARWIN.mp3 (sans numéro d'épisode)
     `https://media.radiofrance-podcast.net/podcast09/18772-${day}.${month}.${year}-SUR-LES-EPAULES-DE-DARWIN.mp3`,
     
-    // Format 3: daymonthyear-EPISODE-id.mp3
-    `https://media.radiofrance-podcast.net/podcast09/18772-${day}${month}${year}-EPISODE${episodeId}.mp3`,
+    // Format brut avec date complète: YYYYMMDD
+    `https://media.radiofrance-podcast.net/podcast09/18772-${year}${month}${day}.mp3`,
     
-    // Format 4: daymonthyear-SUR-LES-EPAULES-DE-DARWIN.mp3
-    `https://media.radiofrance-podcast.net/podcast09/18772-${day}${month}${year}-SUR-LES-EPAULES-DE-DARWIN.mp3`,
+    // Format avec ID explicite de l'émission
+    `https://media.radiofrance-podcast.net/podcast09/18772-DARWIN-${year}${month}${day}.mp3`,
   ];
 };
 
@@ -74,7 +84,7 @@ export const getProbableAudioUrl = (episode: {
     return episode.audioUrl;
   }
   
-  // Si nous n'avons pas d'URL directe, utiliser le premier format d'URL
+  // Si nous n'avons pas d'URL directe, utiliser le format actualisé
   const dateObj = new Date(episode.date);
   const day = dateObj.getDate().toString().padStart(2, '0');
   const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
@@ -83,6 +93,6 @@ export const getProbableAudioUrl = (episode: {
   // Utiliser l'ID d'épisode s'il est disponible, sinon utiliser l'ID par défaut
   const episodeId = extractEpisodeIdFromTitle(episode.title) || episode.id;
   
-  // Format le plus probable pour Sur les épaules de Darwin
-  return `https://media.radiofrance-podcast.net/podcast09/18772-${day}.${month}.${year}-SUR-LES-EPAULES-DE-DARWIN-${episodeId}.mp3`;
+  // Format le plus probable actuel pour les podcasts France Inter
+  return `https://media.radiofrance-podcast.net/podcast09/18772-${year}${month}${day}_FRANCEINTER-${episodeId}.mp3`;
 };
