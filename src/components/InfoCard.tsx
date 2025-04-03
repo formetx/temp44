@@ -39,10 +39,10 @@ const InfoCard: React.FC<InfoCardProps> = ({
       <CardContent>
         <CardDescription className="text-sm text-blue-700">
           Cette application crée un miroir local du podcast "Sur les épaules de Darwin" de Jean-Claude Ameisen. 
-          Les fichiers téléchargés seront sauvegardés dans le dossier <code className="bg-blue-100 px-1 rounded">./FIDarwin</code> sur votre ordinateur.
+          Les fichiers sont téléchargés via une fonction Edge Supabase sécurisée pour contourner les restrictions CORS.
           <br/><br/>
-          <strong>Note</strong>: Dans cette version de démonstration, les téléchargements et le scraping sont simulés. 
-          Dans une implémentation réelle, un serveur backend serait nécessaire pour scraper et télécharger les fichiers.
+          <strong>Note</strong>: Le téléchargement des épisodes est maintenant fonctionnel grâce à l'intégration Supabase.
+          Les fichiers seront sauvegardés dans votre dossier de téléchargements par défaut.
         </CardDescription>
       </CardContent>
       <CardFooter className="pt-0">
@@ -86,3 +86,4 @@ const InfoCard: React.FC<InfoCardProps> = ({
 };
 
 export default InfoCard;
+
