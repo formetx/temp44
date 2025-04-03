@@ -1,9 +1,8 @@
 
-import React, { useState } from 'react';
-import { Episode, DownloadProgress } from '@/types';
+import React from 'react';
+import { Episode } from '@/types';
 import { downloadEpisode } from '@/services/episode/downloader';
 import { useToast } from '@/hooks/use-toast';
-import { Progress } from '@/components/ui/progress';
 
 interface DownloadButtonProps {
   episode: Episode;
@@ -14,48 +13,33 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
   episode,
   onDownloadComplete
 }) => {
-  const [downloadState, setDownloadState] = useState<DownloadProgress>({
-    episodeId: episode.id,
-    progress: 0,
-    isComplete: false
-  });
   const { toast } = useToast();
 
-  const handleDownload = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Empêcher la navigation
+  const handleDownload = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault(); // Empêcher le comportement par défaut du lien
+    
     try {
-      // Réinitialiser l'état de téléchargement
-      setDownloadState({
-        episodeId: episode.id,
-        progress: 0,
-        isComplete: false
+      // Notification du début du téléchargement
+      toast({
+        title: "Téléchargement en cours",
+        description: `Téléchargement de "${episode.title}" en cours...`,
+        duration: 3000,
       });
 
-      // Lancer le téléchargement direct
+      // Lancer le téléchargement réel
       const success = await downloadEpisode(episode, (progress) => {
-        setDownloadState(prev => ({
-          ...prev,
-          progress
-        }));
+        // La progression est gérée dans la fonction downloadEpisode
       });
 
       if (success) {
-        setDownloadState(prev => ({
-          ...prev,
-          isComplete: true
-        }));
         toast({
-          title: "Téléchargement initié",
-          description: `"${episode.title}" est en cours de téléchargement. Vérifiez votre dossier de téléchargements.`,
+          title: "Téléchargement terminé",
+          description: `"${episode.title}" a été téléchargé dans votre dossier de téléchargements.`,
           duration: 5000,
         });
         onDownloadComplete();
       }
     } catch (error) {
-      setDownloadState(prev => ({
-        ...prev,
-        error: "Erreur de téléchargement"
-      }));
       toast({
         title: "Erreur de téléchargement",
         description: "Une erreur s'est produite lors du téléchargement de l'épisode.",
@@ -65,37 +49,12 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
     }
   };
 
-  if (downloadState.isComplete) {
-    return (
-      <span className="text-sm text-green-600">
-        Téléchargement terminé
-      </span>
-    );
-  }
-
-  if (downloadState.progress > 0 && downloadState.progress < 100) {
-    return (
-      <div className="space-y-2 w-full">
-        <Progress value={downloadState.progress} className="h-2" />
-        <p className="text-xs text-muted-foreground">{downloadState.progress}% téléchargé</p>
-      </div>
-    );
-  }
-
-  if (downloadState.error) {
-    return (
-      <a href={episode.audioUrl} 
-         onClick={handleDownload}
-         className="text-sm text-red-600 hover:underline">
-        Réessayer le téléchargement
-      </a>
-    );
-  }
-
   return (
-    <a href={episode.audioUrl} 
-       onClick={handleDownload}
-       className="text-sm text-blue-600 hover:underline">
+    <a 
+      href="#" 
+      onClick={handleDownload}
+      className="text-blue-600 hover:text-blue-800 hover:underline"
+    >
       téléchargement
     </a>
   );

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Episode } from '@/types';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { Calendar, Clock, Image } from 'lucide-react';
+import { Calendar, Clock } from 'lucide-react';
 import DownloadButton from './DownloadButton';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
@@ -58,7 +58,7 @@ const EpisodeCard: React.FC<EpisodeCardProps> = ({ episode }) => {
         <p>{episode.description}</p>
       </CardContent>
       
-      <CardFooter className="pt-2">
+      <CardFooter className="pt-2 flex justify-end">
         <DownloadButton 
           episode={episode} 
           onDownloadComplete={() => setIsDownloaded(true)} 
