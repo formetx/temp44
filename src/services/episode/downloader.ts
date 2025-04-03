@@ -2,10 +2,24 @@
 import { Episode } from "@/types";
 import { createClient } from '@supabase/supabase-js';
 
-// Configuration du client Supabase (utilise les variables d'environnement injectées automatiquement)
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Configuration du client Supabase avec vérification des variables d'environnement
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+// Vérifions que les variables d'environnement sont définies
+if (!supabaseUrl) {
+  console.error("VITE_SUPABASE_URL n'est pas défini dans les variables d'environnement");
+}
+
+if (!supabaseKey) {
+  console.error("VITE_SUPABASE_ANON_KEY n'est pas défini dans les variables d'environnement");
+}
+
+// Création du client Supabase avec des valeurs par défaut si les variables d'environnement ne sont pas disponibles
+const supabase = createClient(
+  supabaseUrl as string || "https://votre-projet.supabase.co", 
+  supabaseKey as string || "votre-clé-anon-par-défaut"
+);
 
 // Fonction pour télécharger un épisode via Supabase Edge Function
 export const downloadEpisode = async (
@@ -17,6 +31,12 @@ export const downloadEpisode = async (
   try {
     // Début du suivi de progression
     onProgress(10);
+
+    // Vérification du client Supabase
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("Configuration Supabase incomplète. Vérifiez vos variables d'environnement.");
+      return false;
+    }
 
     // Construction de l'URL de la fonction edge Supabase avec l'URL audio en paramètre
     const edgeFunctionUrl = `${supabaseUrl}/functions/v1/download-episode?url=${encodeURIComponent(episode.audioUrl)}`;
