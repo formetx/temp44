@@ -22,9 +22,15 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
     isComplete: false
   });
   const { toast } = useToast();
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {
+    if (isDownloading) return;
+
     try {
+      // Marquer le début du téléchargement
+      setIsDownloading(true);
+      
       // Réinitialiser l'état de téléchargement
       setDownloadState({
         episodeId: episode.id,
@@ -32,8 +38,9 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
         isComplete: false
       });
 
-      // Lancer le téléchargement réel
+      // Lancer le téléchargement réel avec mise à jour de la progression
       const success = await downloadEpisode(episode, (progress) => {
+        console.log(`Progression du téléchargement: ${progress}%`);
         setDownloadState(prev => ({
           ...prev,
           progress
@@ -63,6 +70,8 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
         variant: "destructive",
         duration: 5000,
       });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -94,9 +103,13 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
   }
 
   return (
-    <Button onClick={handleDownload} className="france-inter-bg hover:bg-blue-700">
+    <Button 
+      onClick={handleDownload} 
+      className="france-inter-bg hover:bg-blue-700" 
+      disabled={isDownloading}
+    >
       <Download className="h-4 w-4 mr-2" />
-      Télécharger
+      {isDownloading ? "Préparation..." : "Télécharger"}
     </Button>
   );
 };
