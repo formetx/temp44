@@ -49,6 +49,22 @@ export const downloadEpisode = async (
           
           if (progress >= 100) {
             clearInterval(interval);
+            
+            // Téléchargement direct depuis l'URL source en mode simulation
+            try {
+              // Créer un lien invisible et déclencher le téléchargement
+              const link = document.createElement('a');
+              link.href = episode.audioUrl;
+              link.download = fileName;
+              link.target = '_blank'; // Ouvrir dans une nouvelle fenêtre/onglet
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              
+              console.log(`Téléchargement direct depuis ${episode.audioUrl}`);
+            } catch (directError) {
+              console.error("Erreur lors du téléchargement direct:", directError);
+            }
           }
         }, 500);
       };

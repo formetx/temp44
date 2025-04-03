@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Episode, DownloadProgress } from '@/types';
 import { downloadEpisode } from '@/services/episode/downloader';
 import { Button } from '@/components/ui/button';
-import { Download, Check, AlertCircle, HardDrive } from 'lucide-react';
+import { Download, Check, AlertCircle, ExternalLink } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 
@@ -24,6 +24,26 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
   const { toast } = useToast();
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadedFilename, setDownloadedFilename] = useState<string | null>(null);
+
+  const handleDirectDownload = () => {
+    // Crée un nom de fichier basé sur le titre
+    const fileName = `${episode.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp3`;
+    
+    // Crée un lien d'accès direct au fichier audio
+    const link = document.createElement('a');
+    link.href = episode.audioUrl;
+    link.download = fileName;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Téléchargement lancé",
+      description: "Le téléchargement a été lancé directement depuis la source. Vérifiez votre navigateur.",
+      duration: 5000,
+    });
+  };
 
   const handleDownload = async () => {
     if (isDownloading) return;
@@ -75,6 +95,26 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
           duration: 10000,
         });
         onDownloadComplete();
+      } else {
+        // Si le téléchargement échoue, proposer un téléchargement direct
+        toast({
+          title: "Problème de téléchargement",
+          description: (
+            <div>
+              <p>Le téléchargement n'a pas pu être complété correctement.</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2" 
+                onClick={handleDirectDownload}
+              >
+                <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                Télécharger directement
+              </Button>
+            </div>
+          ),
+          duration: 10000,
+        });
       }
     } catch (error) {
       setDownloadState(prev => ({
@@ -83,9 +123,22 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
       }));
       toast({
         title: "Erreur de téléchargement",
-        description: "Une erreur s'est produite lors du téléchargement de l'épisode.",
+        description: (
+          <div>
+            <p>Une erreur s'est produite lors du téléchargement de l'épisode.</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-2" 
+              onClick={handleDirectDownload}
+            >
+              <ExternalLink className="h-3.5 w-3.5 mr-1" />
+              Télécharger directement
+            </Button>
+          </div>
+        ),
         variant: "destructive",
-        duration: 5000,
+        duration: 8000,
       });
     } finally {
       setIsDownloading(false);
@@ -139,22 +192,36 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
 
   if (downloadState.error) {
     return (
-      <Button variant="outline" className="bg-red-50 text-red-600 border-red-200" onClick={handleDownload}>
-        <AlertCircle className="h-4 w-4 mr-2" />
-        Réessayer
-      </Button>
+      <div className="space-y-2 w-full">
+        <Button variant="outline" className="bg-red-50 text-red-600 border-red-200 w-full" onClick={handleDownload}>
+          <AlertCircle className="h-4 w-4 mr-2" />
+          Réessayer
+        </Button>
+        <Button variant="ghost" size="sm" className="w-full text-xs" onClick={handleDirectDownload}>
+          <ExternalLink className="h-3.5 w-3.5 mr-1" />
+          Télécharger directement depuis la source
+        </Button>
+      </div>
     );
   }
 
   return (
-    <Button 
-      onClick={handleDownload} 
-      className="france-inter-bg hover:bg-blue-700" 
-      disabled={isDownloading}
-    >
-      <Download className="h-4 w-4 mr-2" />
-      {isDownloading ? "Préparation..." : "Télécharger"}
-    </Button>
+    <div className="space-y-2 w-full">
+      <Button 
+        onClick={handleDownload} 
+        className="france-inter-bg hover:bg-blue-700 w-full" 
+        disabled={isDownloading}
+      >
+        <Download className="h-4 w-4 mr-2" />
+        {isDownloading ? "Préparation..." : "Télécharger"}
+      </Button>
+      <button 
+        onClick={handleDirectDownload}
+        className="text-xs text-muted-foreground underline hover:text-blue-600 w-full text-center"
+      >
+        Télécharger directement depuis la source
+      </button>
+    </div>
   );
 };
 
