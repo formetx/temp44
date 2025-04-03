@@ -31,11 +31,8 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
         isComplete: false
       });
 
-      console.log("Début du téléchargement de", episode.title);
-
-      // Lancer le téléchargement direct avec un suivi de progression plus détaillé
+      // Lancer le téléchargement direct
       const success = await downloadEpisode(episode, (progress) => {
-        console.log(`Progression du téléchargement: ${progress}%`);
         setDownloadState(prev => ({
           ...prev,
           progress
@@ -55,7 +52,6 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
         onDownloadComplete();
       }
     } catch (error) {
-      console.error("Erreur lors du téléchargement:", error);
       setDownloadState(prev => ({
         ...prev,
         error: "Erreur de téléchargement"
