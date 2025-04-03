@@ -1,7 +1,5 @@
-
 import React from 'react';
 import { Episode } from '@/types';
-import { ExternalLink } from 'lucide-react';
 import { useDownload } from './download/useDownload';
 import DownloadProgress from './download/DownloadProgress';
 import DownloadComplete from './download/DownloadComplete';

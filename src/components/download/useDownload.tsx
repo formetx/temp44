@@ -1,9 +1,10 @@
-
 import { useState } from 'react';
 import { Episode, DownloadProgress } from '@/types';
 import { downloadEpisode } from '@/services/episode/downloader';
 import { getProbableAudioUrl } from '@/services/episode/audioExtractor';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { ExternalLink } from 'lucide-react';
 
 export const useDownload = (episode: Episode, onDownloadComplete: () => void) => {
   const [downloadState, setDownloadState] = useState<DownloadProgress>({
