@@ -2,10 +2,8 @@
 import React, { useState } from 'react';
 import { Episode, DownloadProgress } from '@/types';
 import { downloadEpisode } from '@/services/episode/downloader';
-import { Button } from '@/components/ui/button';
-import { Download, Check, AlertCircle, HardDrive } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
+import { Progress } from '@/components/ui/progress';
 
 interface DownloadButtonProps {
   episode: Episode;
@@ -23,7 +21,8 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
   });
   const { toast } = useToast();
 
-  const handleDownload = async () => {
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Empêcher la navigation
     try {
       // Réinitialiser l'état de téléchargement
       setDownloadState({
@@ -32,7 +31,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
         isComplete: false
       });
 
-      // Lancer le téléchargement réel
+      // Lancer le téléchargement direct
       const success = await downloadEpisode(episode, (progress) => {
         setDownloadState(prev => ({
           ...prev,
@@ -47,7 +46,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
         }));
         toast({
           title: "Téléchargement terminé",
-          description: `"${episode.title}" a été téléchargé dans votre dossier de téléchargements. Vérifiez votre dossier de téléchargements par défaut du navigateur.`,
+          description: `"${episode.title}" a été téléchargé. Vérifiez votre dossier de téléchargements.`,
           duration: 5000,
         });
         onDownloadComplete();
@@ -68,10 +67,9 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
 
   if (downloadState.isComplete) {
     return (
-      <Button variant="outline" className="bg-green-50 text-green-600 border-green-200" disabled>
-        <Check className="h-4 w-4 mr-2" />
-        Téléchargé
-      </Button>
+      <span className="text-sm text-green-600">
+        Téléchargement terminé
+      </span>
     );
   }
 
@@ -86,18 +84,20 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
 
   if (downloadState.error) {
     return (
-      <Button variant="outline" className="bg-red-50 text-red-600 border-red-200" onClick={handleDownload}>
-        <AlertCircle className="h-4 w-4 mr-2" />
-        Réessayer
-      </Button>
+      <a href={episode.audioUrl} 
+         onClick={handleDownload}
+         className="text-sm text-red-600 hover:underline">
+        Réessayer le téléchargement
+      </a>
     );
   }
 
   return (
-    <Button onClick={handleDownload} className="france-inter-bg hover:bg-blue-700">
-      <Download className="h-4 w-4 mr-2" />
-      Télécharger
-    </Button>
+    <a href={episode.audioUrl} 
+       onClick={handleDownload}
+       className="text-sm text-blue-600 hover:underline">
+      téléchargement
+    </a>
   );
 };
 
