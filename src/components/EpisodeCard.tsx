@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Episode } from '@/types';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { Calendar, Clock, Image } from 'lucide-react';
+import { Calendar, Clock } from 'lucide-react';
 import DownloadButton from './DownloadButton';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
